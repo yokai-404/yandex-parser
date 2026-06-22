@@ -4,9 +4,7 @@
 
       <div class="text-center mb-8">
         <h1 class="text-3xl font-bold">Yandex Parser</h1>
-        <p class="text-gray-500 mt-2">
-          Вход в систему
-        </p>
+        <p class="text-gray-500 mt-2">Вход в систему</p>
       </div>
 
       <form @submit.prevent="submit">
@@ -16,6 +14,7 @@
             type="email"
             placeholder="Email"
             class="w-full border rounded-lg px-4 py-3"
+            :class="{ 'border-red-500': error }"
           />
         </div>
 
@@ -25,14 +24,16 @@
             type="password"
             placeholder="Пароль"
             class="w-full border rounded-lg px-4 py-3"
+            :class="{ 'border-red-500': error }"
           />
         </div>
 
         <button
           type="submit"
           class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
+          :disabled="loading"
         >
-          Войти
+          {{ loading ? 'Входим...' : 'Войти' }}
         </button>
 
         <div
@@ -58,11 +59,28 @@ const router = useRouter()
 const email = ref('admin@example.com')
 const password = ref('password')
 
+const error = ref('')
+const loading = ref(false)
+
 const submit = async () => {
+  error.value = ''
+  loading.value = true
+
+  try {
     const ok = await auth.login(email.value, password.value)
 
     if (ok) {
-        await router.push('/')
+      await router.push('/')
+    } else {
+      error.value = 'Неверный email или пароль'
     }
+
+  } catch (e) {
+    error.value =
+      e?.message ||
+      'Ошибка входа. Проверьте данные'
+  } finally {
+    loading.value = false
+  }
 }
 </script>
